@@ -1,0 +1,22 @@
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration threshold="all" debug="true"
+	xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<appender name="console" class="org.apache.log4j.ConsoleAppender">
+		<param name="Target" value="System.out" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern"
+				value="[%d{dd-MMM HH:mm:ss}] %-5p [%-20.20t] %c{1}.%M - %m%n" />
+		</layout>
+	</appender>
+
+	<logger name="org.apache.commons.httpclient">
+		<level value="info" />
+	</logger>
+
+	<root>
+		<level value="info" />
+		<appender-ref ref="console" />
+	</root>
+
+</log4j:configuration>
