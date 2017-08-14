@@ -25,7 +25,7 @@ public class CustomHttpsSocketFactory implements SecureProtocolSocketFactory
    {
       if(!(socket instanceof SSLSocket)) return socket;
       SSLSocket sslSocket = (SSLSocket) socket;
-      sslSocket.setEnabledProtocols(new String[]{"TLSv1.2" });
+      sslSocket.setEnabledProtocols(new String[]{"TLSv1", "TLSv1.1", "TLSv1.2"});
       
       for(int i=0; i< sslSocket.getEnabledProtocols().length; i++)
       System.out.println("EnabledProtocols : " + i + " - " + sslSocket.getEnabledProtocols()[i]);

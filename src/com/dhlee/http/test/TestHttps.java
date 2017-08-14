@@ -20,14 +20,15 @@ public class TestHttps {
 //		httpclient.getHostConfiguration().setHost("localhost", 8443, myhttps);
 //		GetMethod httpget = new GetMethod("/");
 		
-		Protocol myhttps = new Protocol("https", new EasySSLProtocolSocketFactory(), 443);
-		httpclient.getHostConfiguration().setHost("cryptoreport.websecurity.symantec.com", 443, myhttps);
-		GetMethod httpget = new GetMethod("/checker/");
+//		Protocol myhttps = new Protocol("https", new CustomHttpsSocketFactory(new EasySSLProtocolSocketFactory()), 443);
+//		Protocol myhttps = new Protocol("https", new EasySSLProtocolSocketFactory(), 443);
+//		httpclient.getHostConfiguration().setHost("cryptoreport.websecurity.symantec.com", 443, myhttps);
+//		GetMethod httpget = new GetMethod("/checker/");
 
-//		 Protocol.registerProtocol("https", 
-//		new Protocol("https", new EasySSLProtocolSocketFactory(), 443));
-//		HttpClient httpclient = new HttpClient();
-//		GetMethod httpget = new GetMethod("https://cryptoreport.websecurity.symantec.com/checker/");
+		 Protocol.registerProtocol("https", 
+		new Protocol("https", new CustomHttpsSocketFactory(new EasySSLProtocolSocketFactory()), 443));
+//		 new Protocol("https", new EasySSLProtocolSocketFactory(), 443));
+		GetMethod httpget = new GetMethod("https://cryptoreport.websecurity.symantec.com/checker/");
 
 		try {
 		  httpclient.executeMethod(httpget);
