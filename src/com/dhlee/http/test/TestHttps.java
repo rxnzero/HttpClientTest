@@ -28,7 +28,8 @@ public class TestHttps {
 		 Protocol.registerProtocol("https", 
 		new Protocol("https", new CustomHttpsSocketFactory(new EasySSLProtocolSocketFactory()), 443));
 //		 new Protocol("https", new EasySSLProtocolSocketFactory(), 443));
-		GetMethod httpget = new GetMethod("https://cryptoreport.websecurity.symantec.com/checker/");
+		GetMethod httpget = new GetMethod("https://extws2.moneygram.com/extws/services/AgentConnect1305");
+		// https://cryptoreport.websecurity.symantec.com/checker/
 
 		try {
 		  httpclient.executeMethod(httpget);

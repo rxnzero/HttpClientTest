@@ -1,0 +1,10 @@
+[등록방법 예시]
+keytool -keystore C:\jdk1.7.0_80\jre\lib\security\cacerts -importcert -alias jbbanksecureca -file D:\jbbank\EntrustCertificationAuthority-L1K.cer
+
+[등록된 리스트 확인]
+C:\jdk1.7.0_80\bin>keytool -list -keystore C:\jdk1.7.0_80\jre\lib\security\cacerts
+키 저장소 비밀번호 입력:
+....
+인증서 지문(SHA1): E6:18:83:AE:84:CA:C1:C1:CD:52:AD:E8:E9:25:2B:45:A6:4F:B7:E2
+jbbanksecureca, 2017. 10. 27, trustedCertEntry,
+....

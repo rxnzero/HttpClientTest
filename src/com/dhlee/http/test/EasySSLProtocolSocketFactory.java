@@ -36,10 +36,12 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.security.cert.X509Certificate;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.HttpClientError;
@@ -111,10 +113,28 @@ public class EasySSLProtocolSocketFactory implements SecureProtocolSocketFactory
 
     private static SSLContext createEasySSLContext() {
         try {
+        	//---------------------------------------------
+        	// 인증서 없이 하는 방법
+        	//---------------------------------------------
+        	TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+				public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+					return null;
+				}
+
+				public void checkClientTrusted(X509Certificate[] certs,
+						String authType) {
+				}
+
+				public void checkServerTrusted(X509Certificate[] certs,
+						String authType) {
+				}
+			} };
+        	//---------------------------------------------
             SSLContext context = SSLContext.getInstance("SSL");
             context.init(
               null, 
               new TrustManager[] {new EasyX509TrustManager(null)}, 
+//              trustAllCerts,
               null);
             return context;
         } catch (Exception e) {
