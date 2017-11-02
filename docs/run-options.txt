@@ -1,0 +1,1 @@
+-Djavax.net.debug=ssl:handshake:verbose -Djdk.tls.client.protocols=TLSv1.1,TLSv1.2

@@ -1,10 +1,15 @@
 [등록방법 예시]
-D:\jbbank\keytool -keystore D:\jbbank\security\cacerts -importcert -alias jbbanksecureca -file D:\jbbank\EntrustCertificationAuthority-L1K.cer
+D:\jbbank\keytool -keystore D:\jbbank\security\cacerts -storepass changeit  -importcert -alias jbbanksecureca -file D:\jbbank\EntrustCertificationAuthority-L1K.cer
 
 [등록된 리스트 확인]
-C:\jdk1.7.0_80\bin>keytool -list -keystore C:\jdk1.7.0_80\jre\lib\security\cacerts
+D:\jbbank>keytool -list -keystore  .\security\cacerts
 키 저장소 비밀번호 입력:
-....
-인증서 지문(SHA1): E6:18:83:AE:84:CA:C1:C1:CD:52:AD:E8:E9:25:2B:45:A6:4F:B7:E2
-jbbanksecureca, 2017. 10. 27, trustedCertEntry,
-....
+
+키 저장소 유형: JKS
+키 저장소 제공자: SUN
+
+키 저장소에 1개의 항목이 포함되어 있습니다.
+
+jbbanksecureca, 2017. 11. 2, trustedCertEntry,
+인증서 지문(SHA1): F2:1C:12:F4:6C:DB:6B:2E:16:F0:9F:94:19:CD:FF:32:84:37:B2:D7
+D:\jbbank>
