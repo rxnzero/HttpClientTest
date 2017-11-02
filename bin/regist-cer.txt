@@ -1,5 +1,5 @@
 [등록방법 예시]
-keytool -keystore C:\jdk1.7.0_80\jre\lib\security\cacerts -importcert -alias jbbanksecureca -file D:\jbbank\EntrustCertificationAuthority-L1K.cer
+D:\jbbank\keytool -keystore D:\jbbank\security\cacerts -importcert -alias jbbanksecureca -file D:\jbbank\EntrustCertificationAuthority-L1K.cer
 
 [등록된 리스트 확인]
 C:\jdk1.7.0_80\bin>keytool -list -keystore C:\jdk1.7.0_80\jre\lib\security\cacerts

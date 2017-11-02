@@ -1,5 +1,7 @@
 package com.dhlee.http.test;
 
+import java.io.FileInputStream;
+
 /*
  * $HeadURL$
  * $Revision$
@@ -36,6 +38,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 
 import javax.net.SocketFactory;
@@ -130,10 +133,19 @@ public class EasySSLProtocolSocketFactory implements SecureProtocolSocketFactory
 				}
 			} };
         	//---------------------------------------------
+        	
+        	//---------------------------------------------
+        	// use user keyStore
+            // Get trust store   
+            KeyStore trustStore = KeyStore.getInstance("JKS");   
+            String cacertPath = "D:/jbbank/security/cacerts";    
+            trustStore.load(new FileInputStream(cacertPath), "changeit".toCharArray());
+           //---------------------------------------------
+            
             SSLContext context = SSLContext.getInstance("SSL");
             context.init(
               null, 
-              new TrustManager[] {new EasyX509TrustManager(null)}, 
+              new TrustManager[] {new EasyX509TrustManager(trustStore)}, 
 //              trustAllCerts,
               null);
             return context;
