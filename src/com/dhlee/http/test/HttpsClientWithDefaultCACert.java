@@ -115,6 +115,7 @@ public class HttpsClientWithDefaultCACert {
   */  
  public static void main(String[] args) throws Exception {   
   HttpsClientWithDefaultCACert test = new HttpsClientWithDefaultCACert();   
-  test.getHttps("https://www.google.com");   
+  test.getHttps("https://www.google.com");
+//  test.getHttps("https://192.168.10.42");
  }   
 }  

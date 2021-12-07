@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 
-import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpMethodRetryHandler;
@@ -28,6 +27,18 @@ public class HttpCloseTest {
 		cm.getParams().setMaxTotalConnections(100);
 		this.client = new HttpClient(cm);
 		
+		IdleConnectionMonitorthread staleMonitor = new IdleConnectionMonitorthread(cm);
+		
+		try {
+			staleMonitor.start();
+			staleMonitor.join(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		// use HTTP 1.0
+//		client.getParams().setParameter("http.protocol.version", HttpVersion.HTTP_1_0);
+
 		// This generate NEW CONNECTION & TIME_WIAT
 //		IdleConnectionTimeoutThread idleThread = new IdleConnectionTimeoutThread();
 //        idleThread.setTimeoutInterval(20 * 1000);
@@ -39,7 +50,6 @@ public class HttpCloseTest {
 	private byte[] callPostService(String url, String parameterName, byte[] data) throws Exception {
 
 		GetMethod method = new GetMethod(url);
-
 		method.getParams().setSoTimeout(2 * 1000);
 		// method.setRequestHeader("Content-Type","text/html; charset=euc-kr");
 		// add retry Handler - http://hc.apache.org/httpclient-3.x/tutorial.html
@@ -72,8 +82,11 @@ public class HttpCloseTest {
 		    }
 		};
 	
-//		method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, 
-//				myretryhandler);
+		method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, 
+				myretryhandler);
+		
+		// Change Default USER_AGENT value
+		method.getParams().setParameter(HttpMethodParams.USER_AGENT, "TestClient");
 		
 		String sendData = null;
 
@@ -123,11 +136,13 @@ public class HttpCloseTest {
 		HttpCloseTest test = new HttpCloseTest();
 
 		String url = "http://localhost:8080/SpringREST/hello";
+		
+		url = "http://localhost:8080/example/test.jsp";
 		String parameterName = "name";
 		byte[] data = "HttpClient Test".getBytes();		
 		
 		int iter = 0;
-		while(true) {
+//		while(true) {
 			try {
 				iter++;
 				byte[] response= test.callPostService(url, parameterName, data);
@@ -137,20 +152,21 @@ public class HttpCloseTest {
 				System.out.println("CallError : " + ex.toString());
 				ex.printStackTrace();
 			}
-			try {
-				if(iter % 3 == 0) {
-					System.out.println("*****>> Sleep 30 secs...");
-					Thread.sleep(30 * 1000);
-				}
-				else {
-					System.out.println(">> Sleep 10 secs...");
-					Thread.sleep(10 * 1000);					
-				}
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+//			
+//			try {
+//				if(iter % 3 == 0) {
+//					System.out.println("*****>> Sleep 30 secs...");
+//					Thread.sleep(30 * 1000);
+//				}
+//				else {
+//					System.out.println(">> Sleep 10 secs...");
+//					Thread.sleep(10 * 1000);					
+//				}
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
 		
 	}
 }

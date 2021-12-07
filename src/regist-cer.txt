@@ -1,5 +1,6 @@
 [등록방법 예시]
-D:\jbbank\keytool -keystore D:\jbbank\security\cacerts -storepass changeit  -importcert -alias jbbanksecureca -file D:\jbbank\EntrustCertificationAuthority-L1K.cer
+D:\jbbank\keytool -keystore D:\jbbank\security\cacerts -storepass changeit  
+-importcert -alias jbbanksecureca -file D:\jbbank\EntrustCertificationAuthority-L1K.cer
 
 [등록된 리스트 확인]
 D:\jbbank>keytool -list -keystore  .\security\cacerts

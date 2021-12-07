@@ -16,7 +16,7 @@ import javax.net.ssl.X509TrustManager;
 public class SimpleHttpsClient {
 
 	public static void main(String[] args) {
-		String urlStr = "https://www.google.com";
+		String urlStr = "https://192.168.10.42";
 		
 		StringBuffer sb = new StringBuffer();
 		InputStreamReader in = null;
@@ -37,12 +37,12 @@ public class SimpleHttpsClient {
 						String authType) {
 				}
 			} };
-
+			
 			SSLContext sc = SSLContext.getInstance("SSL");
 			sc.init(null, trustAllCerts, new java.security.SecureRandom());
 			HttpsURLConnection
 					.setDefaultSSLSocketFactory(sc.getSocketFactory());
-
+//			.setDefaultSSLSocketFactory(new EasySSLProtocolSocketFactory());
 			URL url = new URL(urlStr);
 			conn = (HttpURLConnection) url.openConnection();
 
@@ -59,15 +59,16 @@ public class SimpleHttpsClient {
 
 		} catch (Exception e) {
 			System.out.println(e.toString());
+			e.printStackTrace();
 		}
 		finally {
 			try {
-				br.close();
+				if(br != null) br.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 			try {
-				in.close();
+				if(in != null) in.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
