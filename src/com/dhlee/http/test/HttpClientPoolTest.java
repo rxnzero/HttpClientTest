@@ -78,6 +78,9 @@ public class HttpClientPoolTest {
 				method = new GetMethod("http://localhost:10210");
 				client.getHttpConnectionManager().getParams().setSoTimeout(1 * 1000);
 		        method.getParams().setSoTimeout(1 * 1000);
+//		        method.getParams().setParameter("http.protocol.handle-redirects",false);
+		        method.setFollowRedirects(false);
+		        
 //		        method.getParams().setParameter("http.protocol.version", HttpVersion.HTTP_1_0);
 		        int status = client.executeMethod(method);
 //	            

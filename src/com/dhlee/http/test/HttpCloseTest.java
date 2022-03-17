@@ -12,6 +12,7 @@ import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.NoHttpResponseException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.commons.httpclient.params.HttpParams;
 
 public class HttpCloseTest {
 
@@ -81,13 +82,18 @@ public class HttpCloseTest {
 		        return false;
 		    }
 		};
-	
+		
+		
+	    
 		method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, 
 				myretryhandler);
 		
 		// Change Default USER_AGENT value
 		method.getParams().setParameter(HttpMethodParams.USER_AGENT, "TestClient");
 		
+		
+//		method.getParams().setParameter("http.protocol.handle-redirects",false);
+	    
 		String sendData = null;
 
 		HttpClient mclient = this.client;
