@@ -18,7 +18,7 @@ public class HttpCloseTest {
 
 	private HttpClient client;
 	MultiThreadedHttpConnectionManager cm = new MultiThreadedHttpConnectionManager();
-	
+	IdleConnectionMonitorthread staleMonitor = null;
 	public HttpCloseTest() {
 		cm.getParams().setStaleCheckingEnabled(true);
 
@@ -28,8 +28,7 @@ public class HttpCloseTest {
 		cm.getParams().setMaxTotalConnections(100);
 		this.client = new HttpClient(cm);
 		
-		IdleConnectionMonitorthread staleMonitor = new IdleConnectionMonitorthread(cm);
-		
+		staleMonitor = new IdleConnectionMonitorthread(cm);
 		try {
 			staleMonitor.start();
 			staleMonitor.join(1000);
@@ -49,9 +48,10 @@ public class HttpCloseTest {
 	}
 
 	private byte[] callPostService(String url, String parameterName, byte[] data) throws Exception {
-
+		int timeout = 2 * 1000;
 		GetMethod method = new GetMethod(url);
-		method.getParams().setSoTimeout(2 * 1000);
+		method.getParams().setSoTimeout(timeout);
+		
 		// method.setRequestHeader("Content-Type","text/html; charset=euc-kr");
 		// add retry Handler - http://hc.apache.org/httpclient-3.x/tutorial.html
 		HttpMethodRetryHandler myretryhandler = new HttpMethodRetryHandler() {
@@ -97,7 +97,7 @@ public class HttpCloseTest {
 		String sendData = null;
 
 		HttpClient mclient = this.client;
-		
+		mclient.getParams().setSoTimeout(timeout);
 		sendData = new String(data);
 		
 		int status = -1;
@@ -173,6 +173,6 @@ public class HttpCloseTest {
 //				e.printStackTrace();
 //			}
 //		}
-		
+			if(test.staleMonitor != null) test.staleMonitor.interrupt();
 	}
 }
