@@ -37,51 +37,63 @@ public class RestApi{
 
         private void sendPostHttps(String send_url, String token_key) throws Exception {
                 URL url = new URL(send_url);
-                HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-                SSLUtils.turnOffSslChecking();
-//                HttpURLConnection con = (HttpURLConnection) url.openConnection();
-
-                con.setRequestMethod("POST");
-                //con.setRequestProperty("User-Agent", USER_AGENT);
-                con.setRequestProperty("Accept-Language", "UTF-8");
-                con.setConnectTimeout(1000);       //ÄÁÅØ¼ÇÅ¸ÀÓ¾Æ¿ô 10ÃÊ
-                con.setReadTimeout(5000);           //ÄÁÅÙÃ÷Á¶È¸ Å¸ÀÓ¾Æ¿ô 5ÃÑ
-                System.out.println("1");
-                con.setDoOutput(true);              //Ç×»ó °»½ÅµÈ³»¿ëÀ» °¡Á®¿È.
-                System.out.println("2");
-                con.setRequestProperty("apiKey",token_key);
-                con.setRequestProperty("cmptnIrt","3.2");
-                con.setRequestProperty("exmtnDstcdC","1");
-                con.setRequestProperty("exmtnDstcdB","1");
-                con.setRequestProperty("revisedirt","3.4");
-                con.setRequestProperty("lnbzTranKndDstcdE","0");
-                con.setRequestProperty("sbjctCdGCZ","1");
-                con.setRequestProperty("anticizIrt","1");
-                con.setRequestProperty("irtModfiTagetDstcdZ","1");
-			    con.setRequestProperty("lnlmtMgivstDstcdA","1");
-                con.setRequestProperty("captlCstAdirt","1");
-                System.out.println("3");
-                DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-                wr.flush();
-                wr.close();
-                System.out.println("4");
-
-                int responseCode = con.getResponseCode();
-                System.out.println("5");
-                System.out.println("\nSending 'POST' request to URL : " + url);
-                System.out.println("API Key : " + token_key);
-                System.out.println("Response Code : " + responseCode);
-
-                Charset charset = Charset.forName("UTF-8");
-                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(),charset));
-                String inputLine;
-                StringBuffer response = new StringBuffer();
-
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
+                HttpsURLConnection con = null; 
+                DataOutputStream wr = null;
+                BufferedReader in = null;
+                try {
+	                con = (HttpsURLConnection) url.openConnection();
+	                SSLUtils.turnOffSslChecking();
+	//                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+	
+	                con.setRequestMethod("POST");
+	                //con.setRequestProperty("User-Agent", USER_AGENT);
+	                con.setRequestProperty("Accept-Language", "UTF-8");
+	                con.setConnectTimeout(1000);       //ÄÁÅØ¼ÇÅ¸ÀÓ¾Æ¿ô 10ÃÊ
+	                con.setReadTimeout(5000);           //ÄÁÅÙÃ÷Á¶È¸ Å¸ÀÓ¾Æ¿ô 5ÃÑ
+	                System.out.println("1");
+	                con.setDoOutput(true);              //Ç×»ó °»½ÅµÈ³»¿ëÀ» °¡Á®¿È.
+	                System.out.println("2");
+	                con.setRequestProperty("apiKey",token_key);
+	                con.setRequestProperty("cmptnIrt","3.2");
+	                con.setRequestProperty("exmtnDstcdC","1");
+	                con.setRequestProperty("exmtnDstcdB","1");
+	                con.setRequestProperty("revisedirt","3.4");
+	                con.setRequestProperty("lnbzTranKndDstcdE","0");
+	                con.setRequestProperty("sbjctCdGCZ","1");
+	                con.setRequestProperty("anticizIrt","1");
+	                con.setRequestProperty("irtModfiTagetDstcdZ","1");
+				    con.setRequestProperty("lnlmtMgivstDstcdA","1");
+	                con.setRequestProperty("captlCstAdirt","1");
+	                System.out.println("3");
+	                wr = new DataOutputStream(con.getOutputStream());
+	                wr.flush();
+	                wr.close();
+	                System.out.println("4");
+	
+	                int responseCode = con.getResponseCode();
+	                System.out.println("5");
+	                System.out.println("\nSending 'POST' request to URL : " + url);
+	                System.out.println("API Key : " + token_key);
+	                System.out.println("Response Code : " + responseCode);
+	
+	                Charset charset = Charset.forName("UTF-8");
+	                in = new BufferedReader(new InputStreamReader(con.getInputStream(),charset));
+	                String inputLine;
+	                StringBuffer response = new StringBuffer();
+	
+	                while ((inputLine = in.readLine()) != null) {
+	                    response.append(inputLine);
+	                }	                
+	                System.out.println(response.toString());
+	                SSLUtils.turnOnSslChecking();
                 }
-                in.close();
-                System.out.println(response.toString());
-                SSLUtils.turnOnSslChecking();
+                catch(Exception ex) {
+                	
+                }
+                finally {
+                	if(wr != null) try { wr.close(); wr = null; } catch(Exception e) { ; }
+                	if(in != null) try { in.close(); in = null;  } catch(Exception e) { ; }
+                	if(con != null) try { con.disconnect(); con = null;  } catch(Exception e) { ; }
+                }
         }
 }
