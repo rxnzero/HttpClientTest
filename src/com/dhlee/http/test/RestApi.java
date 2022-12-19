@@ -3,6 +3,8 @@ package com.dhlee.http.test;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.Charset;
 
@@ -10,6 +12,9 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class RestApi{
         private final String USER_AGENT = "Mozilla/5.0";
+        private final boolean useProxy = false;
+        private final String proxyServer = "localhost";
+        private final int proxyPort = 80;
 
         public static void main(String[] args) throws Exception {
                 RestApi https = new RestApi();
@@ -41,9 +46,13 @@ public class RestApi{
                 DataOutputStream wr = null;
                 BufferedReader in = null;
                 try {
-	                con = (HttpsURLConnection) url.openConnection();
+                	
+                	Proxy proxy = Proxy.NO_PROXY;
+                	if(useProxy) {
+                		proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyServer, proxyPort));
+                	}
+	                con = (HttpsURLConnection) url.openConnection(proxy);
 	                SSLUtils.turnOffSslChecking();
-	//                HttpURLConnection con = (HttpURLConnection) url.openConnection();
 	
 	                con.setRequestMethod("POST");
 	                //con.setRequestProperty("User-Agent", USER_AGENT);
