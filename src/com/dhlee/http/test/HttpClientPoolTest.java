@@ -45,13 +45,13 @@ public class HttpClientPoolTest {
 			e.printStackTrace();
 		}
 		
-		staleMonitor = new IdleConnectionMonitorthread(cm);
-		try {
-			staleMonitor.start();
-			staleMonitor.join(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+//		staleMonitor = new IdleConnectionMonitorthread(cm, 5 * 1000);
+//		try {
+//			staleMonitor.start();
+//			staleMonitor.join(1000);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
 		
 		client = new HttpClient(cm);
 		return client;
@@ -75,7 +75,7 @@ public class HttpClientPoolTest {
 			}
 			
 			try {
-				method = new GetMethod("http://localhost:10210");
+				method = new GetMethod("http://localhost:8080");
 				client.getHttpConnectionManager().getParams().setSoTimeout(1 * 1000);
 		        method.getParams().setSoTimeout(1 * 1000);
 //		        method.getParams().setParameter("http.protocol.handle-redirects",false);
@@ -108,7 +108,7 @@ public class HttpClientPoolTest {
 			}
 		}
 		try {
-			staleMonitor.shutdown();
+			if(staleMonitor != null) staleMonitor.shutdown();
 			Thread.sleep(20 * 1000);
 			printHeap();
 		} catch (Exception e) {

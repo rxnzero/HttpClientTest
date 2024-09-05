@@ -11,8 +11,8 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.NoHttpResponseException;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
-import org.apache.commons.httpclient.params.HttpParams;
 
 public class HttpCloseTest {
 
@@ -21,18 +21,22 @@ public class HttpCloseTest {
 	IdleConnectionMonitorthread staleMonitor = null;
 	public HttpCloseTest() {
 		cm.getParams().setStaleCheckingEnabled(true);
-
+		
 //		cm.getParams().setParameter(HttpMethodParams.PROTOCOL_VERSION, HttpVersion.HTTP_1_0);
 
 		cm.getParams().setDefaultMaxConnectionsPerHost(10);
 		cm.getParams().setMaxTotalConnections(100);
+		cm.getParams().setConnectionTimeout(5 * 1000);
 		this.client = new HttpClient(cm);
 		
-		staleMonitor = new IdleConnectionMonitorthread(cm);
+		// 서버에서 연결을 끊기전에 미리 clean 해야 할 경우
+		staleMonitor = new IdleConnectionMonitorthread(cm, 10 * 1000);
 		try {
-			staleMonitor.start();
-			staleMonitor.join(1000);
-		} catch (InterruptedException e) {
+			if(staleMonitor != null) {
+				staleMonitor.start();
+				staleMonitor.join(1000);
+			}
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
@@ -49,6 +53,7 @@ public class HttpCloseTest {
 
 	private byte[] callPostService(String url, String parameterName, byte[] data) throws Exception {
 		int timeout = 2 * 1000;
+		int soTimeout = 30 * 1000;
 		GetMethod method = new GetMethod(url);
 		method.getParams().setSoTimeout(timeout);
 		
@@ -59,21 +64,30 @@ public class HttpCloseTest {
 		        final HttpMethod method, 
 		        final IOException exception, 
 		        int executionCount) {
+		    	exception.printStackTrace();
 		    	System.out.println("==> myretryhandler retry =" +executionCount);
 		        if (executionCount > 3) {
 		            // Do not retry if over max retry count
 		            return false;
 		        }
 		        if (exception instanceof SocketTimeoutException) {
-		        	System.out.println("SocketTimeoutException - ");
+		        	System.out.println("<== SocketTimeoutException retry =" +executionCount);
 		        	return true;
 		        }
 		        
 		        if (exception instanceof NoHttpResponseException) {
-		            // Retry if the server dropped connection on us
+		        	System.out.println("<== NoHttpResponseException retry =" +executionCount);
+		        	// Retry if the server dropped connection on us
+		            return true;
+		        }
+		        
+		        if (exception instanceof ConnectException) {
+		        	System.out.println("<== ConnectException retry =" +executionCount);
+		        	// Retry if the server dropped connection on us
 		            return true;
 		        }
 		        if (!method.isRequestSent()) {
+		        	System.out.println("<== isRequestSent FALSE retry =" +executionCount);
 		            // Retry if the request has not been sent fully or
 		            // if it's OK to retry methods that have been sent
 		            return true;
@@ -83,21 +97,24 @@ public class HttpCloseTest {
 		    }
 		};
 		
-		
-	    
-		method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, 
-				myretryhandler);
-		
+		// 기본적으로 사용하지 않으나, 재처리가 필요할 경우에만 설정
+//		method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, myretryhandler);
+//		HttpMethodDirector
 		// Change Default USER_AGENT value
 		method.getParams().setParameter(HttpMethodParams.USER_AGENT, "TestClient");
-		
-		
+		method.getParams().setSoTimeout(timeout);
 //		method.getParams().setParameter("http.protocol.handle-redirects",false);
 	    
 		String sendData = null;
 
 		HttpClient mclient = this.client;
-		mclient.getParams().setSoTimeout(timeout);
+		
+		// connection timeout
+        HttpConnectionParams httpConnectionParams = mclient.getHttpConnectionManager().getParams();
+        httpConnectionParams.setConnectionTimeout(timeout);
+        // read timeout
+        method.getParams().setSoTimeout(soTimeout);
+		
 		sendData = new String(data);
 		
 		int status = -1;
@@ -118,8 +135,7 @@ public class HttpCloseTest {
 			byte[] responseMessage = method.getResponseBody();
 			return responseMessage;
 
-		} catch (SocketTimeoutException ste) { // Read Timeout :: HttpClient
-												// 3.1일 경우
+		} catch (SocketTimeoutException ste) { // Read Timeout :: HttpClient												
 			System.out.println("SocketTimeoutException -" + ste.toString());
 			throw ste;
 		} catch (ConnectException ce) {
@@ -132,18 +148,30 @@ public class HttpCloseTest {
 			System.out.println("-----> Finally executed, so releaseConnection");
 			method.releaseConnection();
 //			cm.deleteClosedConnections();
-			if (status != HttpStatus.SC_OK) {
-				System.out.println("Finally http status = " + status);
+			System.out.println("Finally http status = " + status);
+			if (status == HttpStatus.SC_OK) {
+				try {
+					Thread.sleep(300 * 1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
 
 	public static void main(String[] args) {
+//		System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
+//		System.setProperty("org.apache.commons.logging.simplelog.showdatetime", "true");
+//		System.setProperty("org.apache.commons.logging.simplelog.log.httpclient.wire", "debug");
+//		System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.commons.httpclient", "debug");
+		
 		HttpCloseTest test = new HttpCloseTest();
 
 		String url = "http://localhost:8080/SpringREST/hello";
 		
-		url = "http://localhost:8080/example/test.jsp";
+//		url = "http://localhost:8080/example/test.jsp";
+		url = "http://localhost:8080/test.jsp";
+		
 		String parameterName = "name";
 		byte[] data = "HttpClient Test".getBytes();		
 		
@@ -173,6 +201,7 @@ public class HttpCloseTest {
 //				e.printStackTrace();
 //			}
 //		}
+
 			if(test.staleMonitor != null) test.staleMonitor.interrupt();
 	}
 }

@@ -2,15 +2,19 @@ package com.dhlee.http.test;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
+import org.apache.commons.httpclient.methods.multipart.PartSource;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
 
 public class MultipartSender {
@@ -71,6 +75,35 @@ public class MultipartSender {
 
 		System.out.println("status code: " + statusCode + ", respond: " + respond);
 	}
+	
+	public static void example() throws HttpException, IOException {
+		HttpClient client = new HttpClient();
+		PostMethod filePost = new PostMethod("http://host/some_path");
+		File file = new File("/path/to/file");
+		Part[] parts = {
+		    new StringPart("param_name", "value"),
+		    new FilePart(file.getName(), 
+		        new PartSource() {
+		            public long getLength() {
+		                return file.length();
+		            }
+
+		            public String getFileName() {
+		                return file.getName();
+		            }
+
+		            public InputStream createInputStream() throws IOException {
+		                return new FileInputStream(file);
+		            }
+		        })
+		};
+		filePost.setRequestEntity(
+		        new MultipartRequestEntity(parts, filePost.getParams())
+		        );
+		int status = client.executeMethod(filePost);
+	}
+	
+	
 	public static void main(String[] args) {
 		sendMP();
 

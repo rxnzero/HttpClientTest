@@ -11,11 +11,17 @@
 	</appender>
 
 	<logger name="org.apache.commons.httpclient">
-		<level value="info" />
+		<level value="debug" />
+	</logger>
+	<logger name="org.apache.commons.httpclient.wire">
+		<level value="debug" />
+	</logger>
+	<logger name="httpclient.wire">
+		<level value="debug" />
 	</logger>
 
 	<root>
-		<level value="info" />
+		<level value="debug" />
 		<appender-ref ref="console" />
 	</root>
 
