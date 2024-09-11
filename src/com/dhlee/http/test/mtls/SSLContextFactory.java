@@ -5,12 +5,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.KeyStore;
+import java.security.cert.X509Certificate;
 import java.util.Base64;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 public class SSLContextFactory {
 	public static String loadStoreFileToString(String filePath) throws Exception {
@@ -57,13 +60,28 @@ public class SSLContextFactory {
 					.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 			keyManagerFactory.init(keyStore, keyStorePassword.toCharArray());
 
-			TrustManagerFactory trustManagerFactory = TrustManagerFactory
-					.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-			trustManagerFactory.init(trustStore);
-			
-			// SSLContext 설정
+			boolean withTrust = false;
 			SSLContext sslContext = SSLContext.getInstance("TLS");
-			sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
+			if(withTrust) {
+				TrustManagerFactory trustManagerFactory = TrustManagerFactory
+						.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+				trustManagerFactory.init(trustStore);
+				// SSLContext 설정
+				sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), null);
+			}
+			else {
+			TrustManager[] trustAllCerts = new TrustManager[] {
+				    new X509TrustManager() {
+				        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+				            return null;
+				        }
+				        public void checkClientTrusted(X509Certificate[] certs, String authType) { }
+				        public void checkServerTrusted(X509Certificate[] certs, String authType) { }
+				    }
+				};
+				sslContext.init(keyManagerFactory.getKeyManagers(), trustAllCerts, null);				
+			}
+
 			
             // TLS 버전 및 Cipher Suite 설정
             SSLParameters sslParameters = sslContext.getDefaultSSLParameters();
