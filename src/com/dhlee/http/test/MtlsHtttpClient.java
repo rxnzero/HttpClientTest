@@ -1,6 +1,10 @@
 package com.dhlee.http.test;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Base64;
 
 import javax.net.ssl.SSLContext;
 
@@ -16,7 +20,25 @@ import com.dhlee.http.test.mtls.CustomSSLProtocolSocketFactory;
 import com.dhlee.http.test.mtls.SSLContextFactory;
 
 public class MtlsHtttpClient {
-	public static void main(String[] args) {
+	public static String loadStoreFileToString(String filePath) throws Exception {
+		File storeFile = new File(filePath);
+		byte[] contentBytes = new byte[(int) storeFile.length()];
+		try (InputStream inputStream = new FileInputStream(storeFile)) {
+			inputStream.read(contentBytes);
+		}
+//		byte[] encBytes = Base64.getEncoder().encode(contentBytes);
+//		return new String(encBytes, "utf-8");  
+		return Base64.getEncoder().encodeToString(contentBytes);
+	}
+	
+	public static void main(String[] args) throws Exception {
+		System.setProperty("use.test.trust", "y");
+		System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
+        System.setProperty("org.apache.commons.logging.simplelog.showdatetime", "true");
+        System.setProperty("org.apache.commons.logging.simplelog.log.httpclient.wire.header", "DEBUG");
+        System.setProperty("org.apache.commons.logging.simplelog.log.httpclient.wire.content", "DEBUG");
+        System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.commons.httpclient", "DEBUG");
+
 		String mtlsTestUrl = "https://localhost:8443";
 		SSLContext sslContext = null;
 		// javax.net.ssl.SSLHandshakeException: Received fatal alert: bad_certificate
@@ -99,12 +121,16 @@ public class MtlsHtttpClient {
 	        String trustStorePath = "d:/ssl-keystore/truststore.p12";
 	        String trustStorePassword = "changeit";
 	        
+	        String keyStoreInfo = loadStoreFileToString(keyStorePath);
+	        System.out.println("keyStoreInfo["+keyStoreInfo+"]");
+	        String trustStoreInfo = loadStoreFileToString(trustStorePath);
+	        System.out.println("trustStoreInfo["+trustStoreInfo+"]");
 	        
 			// mTLS를 위한 SSLContext 생성
 	        sslContext = SSLContextFactory.createMTLSContextForP12(
-	        		keyStorePath,
+	        		keyStoreInfo,
 	        		keyStorePassword,
-	        		trustStorePath,
+	        		trustStoreInfo,
 	        		trustStorePassword
 	        		,tlsVersions, cipherSuites
 	        );
@@ -116,6 +142,8 @@ public class MtlsHtttpClient {
         // HTTPS 프로토콜 등록 (기존 https를 대체)
         Protocol httpsProtocol = new Protocol("https", socketFactory, 443);
         Protocol.registerProtocol("https", httpsProtocol);
+//        Protocol httpsProtocol = new Protocol(mtlsTestUrl, socketFactory, 443);
+//        Protocol.registerProtocol(mtlsTestUrl, httpsProtocol);
 
         // MultiThreadedHttpConnectionManager 생성
         MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
