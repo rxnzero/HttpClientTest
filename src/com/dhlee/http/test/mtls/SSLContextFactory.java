@@ -61,9 +61,11 @@ public class SSLContextFactory {
 						}
 
 						public void checkClientTrusted(X509Certificate[] certs, String authType) {
+							System.out.println(">>>>> SKIP checkClientTrusted");
 						}
 
 						public void checkServerTrusted(X509Certificate[] certs, String authType) {
+							System.out.println(">>>>> SKIP checkServerTrusted");
 						}
 					} };
 					sslContext.init(keyManagerFactory.getKeyManagers(), trustAllCerts, null);

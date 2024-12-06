@@ -4,14 +4,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Base64;
 
 import javax.net.ssl.SSLContext;
 
+import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
@@ -20,6 +24,16 @@ import com.dhlee.http.test.mtls.CustomSSLProtocolSocketFactory;
 import com.dhlee.http.test.mtls.SSLContextFactory;
 
 public class MtlsHtttpClient {
+	
+	public static String getUrlPath(String urlString) {
+		try {
+			URL url = new URL(urlString);
+			return url.getPath();
+		} catch (MalformedURLException e) {
+			return null;
+		}
+		
+	}
 	public static String loadStoreFileToString(String filePath) throws Exception {
 		File storeFile = new File(filePath);
 		byte[] contentBytes = new byte[(int) storeFile.length()];
@@ -32,6 +46,7 @@ public class MtlsHtttpClient {
 	}
 	
 	public static void main(String[] args) throws Exception {
+		boolean useHostConfig = true;
 		System.setProperty("use.test.trust", "y");
 		System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
         System.setProperty("org.apache.commons.logging.simplelog.showdatetime", "true");
@@ -141,9 +156,17 @@ public class MtlsHtttpClient {
 
         // HTTPS 프로토콜 등록 (기존 https를 대체)
         Protocol httpsProtocol = new Protocol("https", socketFactory, 443);
-        Protocol.registerProtocol("https", httpsProtocol);
-//        Protocol httpsProtocol = new Protocol(mtlsTestUrl, socketFactory, 443);
-//        Protocol.registerProtocol(mtlsTestUrl, httpsProtocol);
+        HostConfiguration hostConfig = new HostConfiguration();
+        if(useHostConfig) {
+            URI uri = new URI(mtlsTestUrl);
+            String host = uri.getHost();
+            int port = uri.getPort();
+            hostConfig.setHost(host, port, new Protocol("https", socketFactory, 443));
+        }
+        else {
+        	Protocol.registerProtocol("https", httpsProtocol);
+        }
+
 
         // MultiThreadedHttpConnectionManager 생성
         MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
@@ -153,9 +176,16 @@ public class MtlsHtttpClient {
 
         // HTTP GET 요청 실행
         HttpMethod method = new GetMethod(mtlsTestUrl);
-
+        int responseCode = -1;
         try {
-            int responseCode = httpClient.executeMethod(method);
+        	if(useHostConfig) {
+        		method = new GetMethod(getUrlPath(mtlsTestUrl));
+        		responseCode = httpClient.executeMethod(hostConfig, method);
+        	}
+        	else {
+        		method = new GetMethod(mtlsTestUrl);
+        		responseCode = httpClient.executeMethod(method);
+        	}
             System.out.println("Response Status: " + responseCode);
             System.out.println("Response Body: " + method.getResponseBodyAsString());
         } catch (HttpException e) {
